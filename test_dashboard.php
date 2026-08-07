@@ -4,7 +4,8 @@ session_start();
 // Validar si el usuario NO ha iniciado sesión
 if (!isset($_SESSION['user_id'])) {
  // Si no está registrado, redirigir inmediatamente al login
- header("Location: index.php");
+ header("Location:
+dashboard.php");
  exit();
 }
 ?>
