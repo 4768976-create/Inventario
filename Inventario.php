@@ -65,6 +65,7 @@ text-decoration: none; border-radius: 5px;">+ Nuevo Producto</a>
 <th>Categoría</th>
 <th>Stock</th>
 <th>Precio Unitario</th>
+<th>Acciones</th> <!-- ¡NUEVA COLUMNA! -->
 </tr>
 </thead>
 <tbody>
@@ -85,8 +86,20 @@ $claseStock = ($fila['stock'] < 10) ? 'stock-bajo' : '';
 <td class="<?php echo $claseStock; ?>"> <?php echo $fila['stock']; ?> unds. </td>
 <td> $<?php echo number_format($fila['precio'], 2); ?> </td>
 </tr>
+<td> $<?php echo number_format($fila['precio'], 2); ?> </td>
+<!-- ¡NUEVA CELDA CON BOTÓN DINÁMICO! -->
+<td>
+<a href="eliminar_producto.php?id=<?php echo $fila['id']; ?>"
+class="btn-eliminar"
+onclick="return confirm('¿Estás absolutamente seguro de eliminar el producto: <?php
+echo $fila['nombre_producto']; ?>?');">
+🗑️ Eliminar
+</a>
+</td>
+</tr>
+<?php } // Fin del bucle while ?>
+
 <?php
-} // Fin del bucle while
 } else {
 ?>
 <!-- Si la tabla está vacía, mostramos este mensaje -->
