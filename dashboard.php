@@ -48,10 +48,6 @@ decoration: none; font-weight: bold; }
 
 .tarjetas-container { display: flex; gap: 20px; justify-content: space-between; margin-
 bottom: 30px; }
-
-Instituto Nacional de Ciudad Barrios
-Bachillerato en Desarrollo de Software - Allan Romero
-
 /* Diseño de cada Métrica */
 .tarjeta { background: white; flex: 1; padding: 25px; border-radius: 8px; box-shadow: 0 4px
 6px rgba(0,0,0,0.05); text-align: center; border-top: 5px solid #3b82f6; }
@@ -107,6 +103,8 @@ $_SESSION['rol']; ?>)</span>
 <h2 style="color: #334155;">Módulos del Sistema</h2>
 <div class="menu-modulos">
 <a href="inventario.php" class="modulo">📦Ir al Catálogo de Inventario</a>
+<a href="proveedores.php" class="modulo" style="background:#8b5cf6;">🚚 Módulo de
+Proveedores</a>
 <!-- Este enlace lo programaremos en el siguiente bloque del año -->
 <a href="#" class="modulo" style="background:#64748b;">🛒Punto de Venta
 (Próximamente)</a>
