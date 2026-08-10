@@ -1,23 +1,45 @@
 <?php
-// 1. Iniciar sesión y aplicar el candado de seguridad (Guía 14)
 session_start();
-if (!isset($_SESSION['user_id'])) {
-header("Location: index.php");
-exit();
+require_once "conexion.php";
+
+// Verificar si el usuario inició sesión
+if (!isset($_SESSION['nombre'])) {
+    header("Location: login.php");
+    exit();
 }
 
-// 2. Incluir el puente de conexión a la base de datos
-require_once 'conexion.php';
+// 1. Verificamos si el usuario envió algo por la barra de búsqueda
+$busqueda = isset($_GET['buscar']) ? $_GET['buscar'] : '';
 
-// 3. Preparar la consulta SQL relacional (Guía 11)
-// Usamos INNER JOIN para mostrar el nombre de la categoría, no su ID numérico
+if ($busqueda != '') {
+
+// 2. Si hay búsqueda, preparamos la consulta con LIKE para nombre o categoría
+$sql = "SELECT p.id, p.nombre_producto, c.nombre_categoria, p.stock, p.precio
+FROM productos p
+INNER JOIN categorias c ON p.categoria_id = c.id
+WHERE p.nombre_producto LIKE ? OR c.nombre_categoria LIKE ?
+ORDER BY p.id ASC";
+
+$stmt = $conn->prepare($sql);
+
+// Le pegamos los comodines % al texto del usuario
+$param_busqueda = "%" . $busqueda . "%";
+
+// Vinculamos el parámetro dos veces (una para el nombre, otra para la categoría)
+$stmt->bind_param("ss", $param_busqueda, $param_busqueda);
+$stmt->execute();
+$resultado = $stmt->get_result();
+$stmt->close();
+} else {
+// 3. Si la barra de búsqueda está vacía, mostramos el inventario normal completo
 $sql = "SELECT p.id, p.nombre_producto, c.nombre_categoria, p.stock, p.precio
 FROM productos p
 INNER JOIN categorias c ON p.categoria_id = c.id
 ORDER BY p.id ASC";
-
-// 4. Ejecutar la consulta con MySQLi Orientado a Objetos
 $resultado = $conn->query($sql);
+}
+
+// ... el resto de tu archivo HTML sigue igual ...
 ?>
 
 <!DOCTYPE html>
@@ -42,6 +64,9 @@ th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
 th { background-color: #f1f5f9; color: #334155; font-weight: bold; }
 tr:hover { background-color: #f8fafc; }
 .stock-bajo { color: #dc2626; font-weight: bold; }
+.btn-eliminar:hover { background-color: #b91c1c; }
+.btn-editar { background-color: #f59e0b; color: white; padding: 6px
+12px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-right: 5px; }
 </style>
 </head>
 <body>
@@ -49,8 +74,22 @@ tr:hover { background-color: #f8fafc; }
 <div class="container">
 <div class="header">
     <h2>Catálogo de Inventario</h2>
-    <a href="nuevo_producto.php" style="background: #3b82f6; color: white; padding: 10px;
-text-decoration: none; border-radius: 5px;">+ Nuevo Producto</a>
+<div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items:
+center;">
+<a href="nuevo_producto.php" style="background: #3b82f6; color: white; padding: 10px;
+text-decoration: none; border-radius: 5px; font-weight: bold;">+ Nuevo Producto</a>
+
+<!-- Formulario de Búsqueda -->
+<form method="GET" style="display: flex; gap: 10px;">
+<input type="text" name="buscar" placeholder="Buscar producto o categoría..."
+value="<?php echo isset($_GET['buscar']) ? $_GET['buscar'] : ''; ?>"
+style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 250px;">
+<button type="submit" style="background: #10b981; color: white; border: none; padding:
+8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">🔍 Buscar</button>
+<a href="inventario.php" style="background: #64748b; color: white; padding: 8px 15px;
+text-decoration: none; border-radius: 4px;">Limpiar</a>
+</form>
+</div>
 <div>
 <span>Usuario: <strong><?php echo $_SESSION['nombre']; ?></strong></span>
 <a href="logout.php" class="btn-salir">Cerrar Sesión</a>
@@ -89,6 +128,9 @@ $claseStock = ($fila['stock'] < 10) ? 'stock-bajo' : '';
 <td> $<?php echo number_format($fila['precio'], 2); ?> </td>
 <!-- ¡NUEVA CELDA CON BOTÓN DINÁMICO! -->
 <td>
+    <!-- NUEVO BOTÓN DE EDITAR -->
+<a href="editar_producto.php?id=<?php echo $fila['id']; ?>" class="btn-editar">✏️
+Editar</a>
 <a href="eliminar_producto.php?id=<?php echo $fila['id']; ?>"
 class="btn-eliminar"
 onclick="return confirm('¿Estás absolutamente seguro de eliminar el producto: <?php
